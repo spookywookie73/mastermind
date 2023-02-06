@@ -5,7 +5,7 @@ class Mastermind
 
   def initialize
     @round = 1
-    @code = nil
+    #@code = nil
   end
 
   def rules
@@ -32,16 +32,22 @@ class Mastermind
       elsif round == 12
         print "This is your final guess. Choose wisely: "
         input = guess(gets.chomp).to_i
-          if input == code
-            puts "You win. The code was #{code}."
-            break
-          end
-      else
-        print "Enter your guess: "
-        input = guess(gets.chomp).to_i
+        
         if input == code
           puts "You win. The code was #{code}."
           break
+        else
+          check_guess(input, code)
+        end
+      else
+        print "Enter your guess: "
+        input = guess(gets.chomp).to_i
+        
+        if input == code
+          puts "You win. The code was #{code}."
+          break
+        else
+          check_guess(input, code)
         end
       end
       @round += 1
@@ -49,13 +55,35 @@ class Mastermind
   end
 
   def guess(input)
-    if (input.to_i != 0) && (input.to_s.length == 4)
+    if (input.split("").any? { |num| num.to_i < 1 || num.to_i > 6 })
+      puts "Please choose numbers from 1 to 6."
+      print "Enter your guess: "
+      input = guess(gets.chomp).to_i
+    elsif (input.to_i != 0) && (input.to_s.length == 4)
       input
     else
       print "Please enter 4 valid numbers: "
       input = guess(gets.chomp).to_i
     end
-  end 
+  end
+
+  def check_guess(input, code)
+    input_split = input.to_s.split("")
+    code_split = code.to_s.split("")
+    
+    exact = code_split.zip(input_split).count { |a, b| a == b }
+    inexact_position = 0
+    code_copy = code_split.clone
+    input_split.each do |digit|
+      if code_copy.include?(digit)
+        code_copy.delete_at(code_copy.find_index(digit))
+        inexact_position += 1
+      end
+    end
+    inexact = inexact_position - exact
+    puts "The numbers you got exact: #{exact}"
+    puts "The numbers correct but in the wrong position: #{inexact}"
+  end
   
   def computer_code
     [rand(1..6), rand(1..6), rand(1..6), rand(1..6)].join.to_i
